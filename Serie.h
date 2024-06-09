@@ -4,18 +4,19 @@
 
 #ifndef SERIE_H
 #define SERIE_H
-#include "video.h"
+#include "Video.h"
 
 
-class serie : public video{
+class Serie : public Video{
 public:
-    serie();
-    serie(int temporadas,  int capitulos);
+    Serie();
+    Serie(int temporadas, int capitulos);
 
     int get_temporadas();
     bool set_temporas(int temporadas);
     int get_capitulos();
     bool set_capitulos(int capitulos);
+    void print() override;
 
 private:
     int temporadas;

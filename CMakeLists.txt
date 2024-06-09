@@ -4,9 +4,9 @@ project(untitled)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(untitled main.cpp
-        video.cpp
-        video.h
-        pelicula.cpp
-        pelicula.h
-        serie.cpp
-        serie.h)
+        Video.cpp
+        Video.h
+        Pelicula.cpp
+        Pelicula.h
+        Serie.cpp
+        Serie.h)
