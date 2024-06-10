@@ -164,43 +164,134 @@ bool loadVideoFromCSV(const string& fileName, Pelicula *peliculaArray, Serie *se
 int main() {
     Pelicula *arrayPeliculas = nullptr;
     Serie *arraySeries = nullptr;
-
     int dataSize = 0;
 
-    dataSize = countDataLinesInCSV(VIDEOS);
-    if(dataSize == -1) {
-        cerr << "No se pudo cargar el data set de " << VIDEOS << "\n";
-        return -1;
-    }
 
-    cout << "Videos.csv tiene: " << dataSize << " entradas\n";
-    arraySeries = new(nothrow) Serie[dataSize];
-    arrayPeliculas = new(nothrow) Pelicula[dataSize];
 
-    if(arraySeries == nullptr || arrayPeliculas == nullptr) {
-        cerr << "No hubo memoria para el arreglo de " << VIDEOS << "\n";
-        return 0;
-    }
+//    for (int i = 0; i < dataSize; i++) {
+//        if(arrayPeliculas[i].get_nombre() != "NA"){
+//            cout << "Pelicula: " << i << endl;
+//            arrayPeliculas[i].print();
+//        }
+//    }
+//    for(int i = 0; i < dataSize; i++){
+//        if(arraySeries[i].get_nombre() != "NA"){
+//            cout << "Serie: " << i << endl;
+//            arraySeries[i].print();
+//        }
+//    }
 
-    if(!loadVideoFromCSV(VIDEOS, arrayPeliculas, arraySeries, dataSize)) {
-        cerr << "Error al cargar el data set de " << VIDEOS << "\n";
-        delete [] arraySeries;
-        delete [] arrayPeliculas;
-        return 0;
-    }
+    bool menu = true;
+    bool archivoCargado = false;
 
-    for (int i = 0; i < dataSize; i++) {
-        if(arrayPeliculas[i].get_nombre() != "NA"){
-            cout << "Pelicula: " << i << endl;
-            arrayPeliculas[i].print();
+    while(menu){
+        cout << "1. Cargar archivo\n"
+                "2. Menu peliculas\n"
+                "3. Menu series\n"
+                "4. Salir\n";
+
+        int opcion;
+        cin >> opcion;
+
+        switch(opcion){
+            case 1: {
+                cout << "Insertar nombre del archivo en la carpeta: " << endl;
+                string archivo;
+                cin >> archivo;
+                archivo = "C:/Users/coshe/CLionProjects/SPPOO2/" + archivo;
+
+                dataSize = countDataLinesInCSV(archivo);
+                if (dataSize == -1) {
+                    cerr << "No se pudo cargar el data set de " << archivo << "\n";
+                    return -1;
+                }
+
+                cout << "Videos.csv tiene: " << dataSize << " entradas\n";
+                arraySeries = new(nothrow) Serie[dataSize];
+                arrayPeliculas = new(nothrow) Pelicula[dataSize];
+
+                if (arraySeries == nullptr || arrayPeliculas == nullptr) {
+                    cerr << "No hubo memoria para el arreglo de " << archivo << "\n";
+                    return 0;
+                }
+
+                if (!loadVideoFromCSV(archivo, arrayPeliculas, arraySeries, dataSize)) {
+                    cerr << "Error al cargar el data set de " << archivo << "\n";
+                    delete[] arraySeries;
+                    delete[] arrayPeliculas;
+                    return 0;
+                }
+                archivoCargado = true;
+
+                break;
+            }
+            case 2: {
+                if (!archivoCargado) {
+                    cout << "Primero carga un archivo" << endl;
+                    break;
+                }
+                while(true) {
+                    cout << "1. Buscar por calificacion\n"
+                            "2. Buscar por genero\n"
+                            "3. Regresar\n";
+
+                    int opcionPeliculas;
+                    cin >> opcionPeliculas;
+
+                    switch (opcionPeliculas) {
+                        case 1: {
+                            cout << "Insertar calificacion: " << endl;
+                            float calificacion;
+                            cin >> calificacion;
+                            cout << "Peliculas con calificacion entre " << calificacion-0.5 << " y " << calificacion+0.5 << endl;
+                            for (int i = 0; i < dataSize; i++) {
+                                if (arrayPeliculas[i].get_nombre() != "NA" &&
+                                        (arrayPeliculas[i].get_calificacion() > calificacion-0.5)
+                                        && arrayPeliculas[i].get_calificacion() < calificacion+0.5){
+                                    cout << "Pelicula: " << i << endl;
+                                    arrayPeliculas[i].print();
+                                }
+                            }
+                            break;
+                        }
+                        case 2: {
+                            cout << "Insertar genero: " << endl;
+                            string genero;
+                            cin >> genero;
+
+                            for (int i = 0; i < dataSize; i++) {
+                                if (arrayPeliculas[i].get_nombre() != "NA" &&
+                                    arrayPeliculas[i].get_genero() == genero) {
+                                    cout << "Pelicula: " << i << endl;
+                                    arrayPeliculas[i].print();
+                                }
+                            }
+                            break;
+                        }
+                        case 3: {
+                            break;
+                        }
+                    }
+                }
+
+                break;
+            }
+            case 3: {
+                if (!archivoCargado) {
+                    cout << "Primero carga un archivo" << endl;
+                    break;
+                }
+
+                break;
+            }
+            case 4: {
+                menu = false;
+                break;
+            }
         }
+
     }
-    for(int i = 0; i < dataSize; i++){
-        if(arraySeries[i].get_nombre() != "NA"){
-            cout << "Serie: " << i << endl;
-            arraySeries[i].print();
-        }
-    }
+
 
     delete [] arraySeries;
     delete [] arrayPeliculas;

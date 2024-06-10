@@ -11,6 +11,7 @@ class Serie : public Video{
 public:
     Serie();
     Serie(int temporadas, int capitulos);
+    ~Serie() = default;
 
     int get_temporadas();
     bool set_temporas(int temporadas);

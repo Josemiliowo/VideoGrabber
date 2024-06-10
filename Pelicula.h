@@ -11,6 +11,8 @@ class Pelicula : public Video{
 public:
     Pelicula();
     Pelicula(int nominaciones);
+    ~Pelicula() = default;
+
     int get_nominaciones();
     bool set_nominaciones(int nominaciones);
     void print() override;

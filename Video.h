@@ -21,6 +21,7 @@ public:
 protected:
     Video(float duracion, float calificacion, std::string genero, std::string nombre);
     Video();
+    ~Video()= default;
     virtual void print();
 
 private:
