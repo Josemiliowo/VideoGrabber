@@ -18,13 +18,13 @@ public:
     bool set_nombre(const std::string &nombre);
 
 
-protected:
+//protected:
     Video(float duracion, float calificacion, std::string genero, std::string nombre);
     Video();
     ~Video()= default;
     virtual void print();
 
-private:
+protected:
     float duracion;
     float calificacion;
     std::string genero;

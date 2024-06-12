@@ -9,7 +9,8 @@ Serie::Serie() {
     temporadas = 0;
     capitulos = 0;
 }
-Serie::Serie(int temporadas, int capitulos) {
+Serie::Serie(int temporadas, int capitulos) : Video(duracion, calificacion, genero, nombre){
+
     this->temporadas = temporadas;
     this->capitulos = capitulos;
 }
