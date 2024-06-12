@@ -9,7 +9,7 @@ Pelicula::Pelicula() {
     nominaciones = 0;
 }
 
-Pelicula::Pelicula(int nominaciones) {
+Pelicula::Pelicula(int nominaciones) : Video(duracion, calificacion, genero, nombre){
     this->nominaciones = nominaciones;
 }
 

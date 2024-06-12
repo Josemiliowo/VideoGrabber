@@ -11,6 +11,7 @@ class Pelicula : public Video{
 public:
     Pelicula();
     Pelicula(int nominaciones);
+    Pelicula(int nominaciones, float duracion, float calificacion, std::string genero, std::string nombre);
     ~Pelicula() = default;
 
     int get_nominaciones();
