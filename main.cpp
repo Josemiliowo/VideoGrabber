@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
+#include <vector>
 #include "Pelicula.h"
 #include "Serie.h"
 
@@ -36,16 +38,67 @@ int countDataLinesInCSV(const string& fileName) {
     return(lineCount);
 }
 
-bool loadVideoFromCSV(const string& fileName, Video **videoArray, unsigned int arraySize) {
-    ifstream file(fileName);
+void appendValueToLineInCSV(const std::string& filename, int lineNumber, const std::string& value) {
+    std::ifstream fileIn(filename);
+    std::vector<std::string> lines;
+    std::string line;
+
+    // Leer todas las lineas y guardarlas en un vector
+    while (std::getline(fileIn, line)) {
+        lines.push_back(line);
+    }
+    fileIn.close();
+
+    // Busca la linea en el vector y modifica el valor. Igualmente revisa que la linea exista
+    if (lineNumber >= 0 && lineNumber+1 < lines.size()) {
+        lines[lineNumber+1] += "," + value;
+    }
+
+    // Reescribe el archivo en su totalidad
+    std::ofstream fileOut(filename);
+    for (const auto& line : lines) {
+        fileOut << line << "\n";
+    }
+    fileOut.close();
+}
+
+bool loadVideoGradesfromCSV(const string& filename,float* gradeArray , unsigned int arraySize){
+    ifstream file(filename);
     string line;
 
-
-    videoArray = new(nothrow) Video* [arraySize];
-    if (videoArray == nullptr) {
-        cout << "No hay memoria para las figuras\n";
-        return 0;
+    if (!file.is_open()) {
+        cerr << "Error al abrir el archivo: " << filename << endl;
+        return false;
     }
+    if (!getline(file, line)) {
+        cerr << "El archivo no tiene header" << endl;
+        file.close();
+        return false;
+    }
+
+    int element = 0;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string cell;
+        float calificacion = 0;
+        int contador = 0;
+
+        while (getline(ss, cell, ',')) {
+            calificacion = calificacion + stof(cell);
+            contador++;
+        }
+
+        gradeArray[element] = static_cast<float>(calificacion)/contador;
+        element++;
+    }
+    return true;
+}
+
+
+bool loadVideoFromCSV(const string& fileName, Video** videoArray, unsigned int arraySize) {
+    ifstream file(fileName);
+    string line;
 
     for (unsigned int i = 0; i < arraySize; i++) {
         videoArray[i] = nullptr;
@@ -65,121 +118,121 @@ bool loadVideoFromCSV(const string& fileName, Video **videoArray, unsigned int a
 
     cout << "Cargando archivo: " << fileName << endl;
 
+    int element = 0;
+
     while (getline(file, line)) {
 
         stringstream ss(line);
         string cell;
         int campo = 0, errores = 0;
         int sizeArray = 0;
-        int element = 0;
+
+        bool flagSerie = false;
+        bool flagPelicula = false;
+
+        string nombre = "NA";
+        string genero = "NA";
+        float duracion = 0;
+        float calificacion = 0;
+        int nominaciones = 0;
+        int capitulos = 0;
+        int temporadas = 0;
 
         while (getline(ss, cell, ',')) {
             if (!cell.length())
                 errores++;
 
-            bool flagSerie = false;
-            bool flagPelicula = false;
-
-            string nombre = "NA";
-            string genero = "NA";
-            float duracion = 0;
-            float calificacion = 0;
-            int nominaciones = 0;
-            int capitulos = 0;
-            int temporadas =  0;
-
-            switch(campo) {
+            switch (campo) {
                 case 0:
-                    if(cell == "serie") {
+                    if (cell == "serie") {
                         flagSerie = true;
-                    } else if(cell == "pelicula") {
+                    } else if (cell == "pelicula") {
                         flagPelicula = true;
                     }
                     //cout << cell << endl;
                     //cout << flagPelicula << " " << flagSerie << endl;
                     break;
                 case 1:
-                    if(typeid(*videoArray[element]) == typeid(Serie)){
+                    if (flagSerie) {
                         nombre = cell;
-                    } else if(typeid(*videoArray[element]) == typeid(Pelicula)){
+                    } else if (flagPelicula) {
                         nombre = cell;
                     }
                     //cout << cell << endl;
                     break;
                 case 2:
-                    if(typeid(*videoArray[element]) == typeid(Serie)){
+                    if (flagSerie) {
                         duracion = stof(cell);
-                    } else if(typeid(*videoArray[element]) == typeid(Pelicula)){
+                    } else if (flagPelicula) {
                         duracion = stof(cell);
                     }
                     break;
                 case 3:
-                    if(typeid(*videoArray[element]) == typeid(Serie)){
+                    if (flagSerie) {
                         calificacion = stof(cell);
-                    } else if(typeid(*videoArray[element]) == typeid(Pelicula)){
+                    } else if (flagPelicula) {
                         calificacion = stof(cell);
                     }
                     //cout << cell << endl;
                     break;
                 case 4:
-                    if(typeid(*videoArray[element]) == typeid(Serie)){
+                    if (flagSerie) {
                         genero = cell;
-                    } else if(typeid(*videoArray[element]) == typeid(Pelicula)){
+                    } else if (flagPelicula) {
                         genero = cell;
                     }
                     //cout << cell << endl;
                     break;
                 case 5:
-                    if(typeid(*videoArray[element]) == typeid(Pelicula)) {
+                    if (flagSerie) {
                         nominaciones = (stoi(cell));
-                    } else if(typeid(*videoArray[element]) == typeid(Serie)){
+                    } else if (flagPelicula) {
                         capitulos = (stoi(cell));
                     }
                     //cout << cell << endl;
                     break;
                 case 6:
-                    if(typeid(*videoArray[element]) == typeid(Serie)){
+                    if (flagSerie) {
                         temporadas = (stoi(cell));
-                    //cout << cell << endl;
+                        //cout << cell << endl;
+                    }
                     break;
+
                 default:
-                    errores ++;
+                    errores++;
                     break;
+
+            }
+            campo++;
+        }
+            // Comparar si son 7 campos, aqui depende de cuantas
+            // entradas tiene cada clase
+            if (errores || campo != ATTRIBUTES) {
+                cerr << "Error en la linea: " << endl << line << endl;
+                file.close();
+                return false;
             }
 
-            campo ++;
-
+            if ((element < arraySize) && flagSerie) {
+                videoArray[element] = new(nothrow) Serie(temporadas, capitulos, duracion, calificacion, genero, nombre);
+                element++;
+            } else if ((element < arraySize) && flagPelicula) {
+                videoArray[element] = new(nothrow) Pelicula(nominaciones, duracion, calificacion, genero, nombre);
+                element++;
+            } else if ((element) >= arraySize) {
+                cerr << "Error, el arreglo es muy pequeño" << endl;
+                file.close();
+                return false;
+            }
         }
-        // Comparar si son 7 campos, aqui depende de cuantas
-        // entradas tiene cada clase
-        if(errores || campo != ATTRIBUTES) {
-            cerr << "Error en la linea: " << endl << line << endl;
-            file.close();
-            return false;
-        }
-
-
-        if((element < arraySize) && flagSerie) {
-            videoArray[element] = new Serie(temporadas, capitulos, duracion, calificacion, genero, nombre);
-            element ++;
-        } else if((element < arraySize) && flagPelicula) {
-            videoArray[element] = new Pelicula(nominaciones, duracion, calificacion, genero, nombre);
-            element ++;
-        } else if((element) >= arraySize){
-            cerr << "Error, el arreglo es muy pequeño" << endl;
-            file.close();
-            return false;
-        }
-
+        file.close();
+        return true;
     }
-    file.close();
-
-    return true;
-}
 
 int main(){
-
-    Video *arrayVideos = nullptr;
+    string archivoCalif;
+    Video** arrayVideos = nullptr;
+    float* arrayGrades;
     int dataSize = 0;
     bool menu = true;
     bool archivoCargado = false;
@@ -188,7 +241,9 @@ int main(){
         cout << "1. Cargar archivo\n"
                 "2. Menu peliculas\n"
                 "3. Menu series\n"
-                "4. Salir\n";
+                "4. Calificar\n"
+                "5. Salir\n"
+                "6. Debug\n";
 
         int opcion;
         cin >> opcion;
@@ -198,7 +253,8 @@ int main(){
                 cout << "Insertar nombre del archivo en la carpeta: " << endl;
                 string archivo;
                 cin >> archivo;
-                archivo = "C:/Users/josem/CLionProjects/SPPOO2/" + archivo;
+                archivoCalif = "C:/Users/coshe/OneDrive/Documents/GitHub/SPPOO2/C" + archivo;
+                archivo = "C:/Users/coshe/OneDrive/Documents/GitHub/SPPOO2/" + archivo;
 
                 dataSize = countDataLinesInCSV(archivo);
                 if (dataSize == -1) {
@@ -207,20 +263,24 @@ int main(){
                 }
 
                 cout << "Videos.csv tiene: " << dataSize << " entradas\n";
-                arraySeries = new(nothrow) Serie[dataSize];
-                arrayPeliculas = new(nothrow) Pelicula[dataSize];
-
-                if (arraySeries == nullptr || arrayPeliculas == nullptr) {
+                arrayVideos = new(nothrow) Video* [dataSize];
+                if (arrayVideos == nullptr) {
                     cerr << "No hubo memoria para el arreglo de " << archivo << "\n";
                     return 0;
                 }
 
-                if (!loadVideoFromCSV(archivo, arrayPeliculas, arraySeries, dataSize)) {
+                arrayGrades = new(nothrow) float[dataSize];
+                if (!loadVideoFromCSV(archivo, arrayVideos, dataSize)) {
                     cerr << "Error al cargar el data set de " << archivo << "\n";
-                    delete[] arraySeries;
-                    delete[] arrayPeliculas;
+                    delete[] arrayVideos;
                     return 0;
                 }
+                if (!loadVideoGradesfromCSV(archivoCalif, arrayGrades, dataSize)) {
+                    cerr << "Error al cargar el data set de " << archivoCalif << "\n";
+                    delete[] arrayGrades;
+                    return 0;
+                }
+
                 archivoCargado = true;
 
                 break;
@@ -231,12 +291,12 @@ int main(){
                     break;
                 }
                 bool menuPeliculas = true;
+                int opcionPeliculas;
                 while(menuPeliculas) {
                     cout << "1. Buscar por calificacion\n"
                             "2. Buscar por genero\n"
                             "3. Regresar\n";
 
-                    int opcionPeliculas;
                     cin >> opcionPeliculas;
 
                     switch (opcionPeliculas) {
@@ -244,14 +304,35 @@ int main(){
                             cout << "Insertar calificacion: " << endl;
                             float calificacion;
                             cin >> calificacion;
-                            cout << "Peliculas con calificacion entre " << calificacion-0.5 << " y " << calificacion+0.5 << endl;
-                            for (int i = 0; i < dataSize; i++) {
-                                if (arrayPeliculas[i].get_nombre() != "NA" &&
-                                        (arrayPeliculas[i].get_calificacion() > calificacion-0.5)
-                                        && arrayPeliculas[i].get_calificacion() < calificacion+0.5){
-                                    cout << "Pelicula: " << i << endl;
-                                    arrayPeliculas[i].print();
+                            if (calificacion < 0 || calificacion > 5) {
+                                cout << "Calificacion invalida" << endl;
+                                break;
+                            }
+                            calificacion = floor(calificacion);
+                            if(calificacion == 5.0){
+                                cout << "Peliculas con calificacion 5:" << endl;
+                                for (int i = 0; i < dataSize; i++) {
+                                    if(typeid(*arrayVideos[i]) == typeid(Pelicula)){
+                                        if (arrayVideos[i]->get_nombre() != "NA" && (arrayGrades[i] == 5.0)){
+                                            cout << "Pelicula " << i << ":" << endl;
+                                            arrayVideos[i]->print();
+                                            cout << "Calificacion: " << arrayGrades[i] << endl;
                                         }
+                                    }
+                                }
+                            } else{
+                                cout << "Peliculas con calificacion entre " << calificacion << " y " << calificacion+0.9 << endl;
+                                for (int i = 0; i < dataSize; i++) {
+                                    if(typeid(*arrayVideos[i]) == typeid(Pelicula)){
+                                        if (arrayVideos[i]->get_nombre() != "NA" &&
+                                            (arrayGrades[i] > calificacion)
+                                            && arrayGrades[i] < calificacion+0.99){
+                                            cout << "Pelicula " << i << ":" << endl;
+                                            arrayVideos[i]->print();
+                                            cout << "Calificacion: " << arrayGrades[i] << endl;
+                                        }
+                                    }
+                                }
                             }
                             break;
                         }
@@ -259,13 +340,15 @@ int main(){
                             cout << "Insertar genero: " << endl;
                             string genero;
                             cin >> genero;
-
+                            cout << "Pelicula con genero: " << genero << endl;
                             for (int i = 0; i < dataSize; i++) {
-                                if (arrayPeliculas[i].get_nombre() != "NA" &&
-                                    arrayPeliculas[i].get_genero() == genero) {
-                                    cout << "Pelicula: " << i << endl;
-                                    arrayPeliculas[i].print();
+                                if(typeid(*arrayVideos[i]) == typeid(Pelicula)){
+                                    if (arrayVideos[i]->get_nombre() != "NA" &&
+                                        arrayVideos[i]->get_genero() == genero) {
+                                        cout << "Pelicula: " << i << endl;
+                                        arrayVideos[i]->print();
                                     }
+                                }
                             }
                             break;
                         }
@@ -283,13 +366,13 @@ int main(){
                     cout << "Primero carga un archivo" << endl;
                     break;
                 }
+                int opcionSeries;
                 bool menuSeries = true;
                 while(menuSeries) {
                     cout << "1. Buscar por calificacion\n"
                                 "2. Buscar por genero\n"
                                 "3. Regresar\n";
 
-                    int opcionSeries;
                     cin >> opcionSeries;
 
                     switch(opcionSeries) {
@@ -297,15 +380,37 @@ int main(){
                             cout << "Insertar calificacion: " << endl;
                             float calificacion;
                             cin >> calificacion;
-                            cout << "Series con calificacion entre " << calificacion-0.5 << " y " << calificacion+0.5 << endl;
-                            for (int i = 0; i < dataSize; i++) {
-                                if (arraySeries[i].get_nombre() != "NA" &&
-                                    (arraySeries[i].get_calificacion() > calificacion-0.5)
-                                    && arraySeries[i].get_calificacion() < calificacion+0.5){
-                                    cout << "Serie: " << i << endl;
-                                    arraySeries[i].print();
-                                    }
+                            if (calificacion < 0 || calificacion > 5) {
+                                cout << "Calificacion invalida" << endl;
+                                break;
                             }
+                            calificacion = floor(calificacion);
+                            if(calificacion == 5.0){
+                                cout << "Series con calificacion 5:" << endl;
+                                for (int i = 0; i < dataSize; i++) {
+                                    if(typeid(*arrayVideos[i]) == typeid(Serie)){
+                                        if (arrayVideos[i]->get_nombre() != "NA" && (arrayGrades[i] == 5.0)){
+                                            cout << "Serie " << i << ":" << endl;
+                                            arrayVideos[i]->print();
+                                            cout << "Calificacion: " << arrayGrades[i] << endl;
+                                        }
+                                    }
+                                }
+                            } else{
+                                cout << "Series con calificacion entre " << calificacion << " y " << calificacion+0.9 << endl;
+                                for (int i = 0; i < dataSize; i++) {
+                                    if(typeid(*arrayVideos[i]) == typeid(Serie)){
+                                        if (arrayVideos[i]->get_nombre() != "NA" &&
+                                            (arrayGrades[i] > calificacion)
+                                            && arrayGrades[i] < calificacion+0.99) {
+                                            cout << "Serie " << i << ":" << endl;
+                                            arrayVideos[i]->print();
+                                            cout << "Calificacion: " << arrayGrades[i] << endl;
+                                        }
+                                    }
+                                }
+                            }
+
                             break;
                         }
                         case 2: {
@@ -314,11 +419,13 @@ int main(){
                             cin >> genero;
                             cout << "Series con genero: " << genero << endl;
                             for (int i = 0; i < dataSize; i++) {
-                                if (arraySeries[i].get_nombre() != "NA" &&
-                                    arraySeries[i].get_genero() == genero) {
-                                    cout << "Serie: " << i << endl;
-                                    arraySeries[i].print();
+                                if(typeid(*arrayVideos[i]) == typeid(Serie)){
+                                    if (arrayVideos[i]->get_nombre() != "NA" &&
+                                        arrayVideos[i]->get_genero() == genero) {
+                                        cout << "Serie: " << i << endl;
+                                        arrayVideos[i]->print();
                                     }
+                                }
                             }
                             break;
                         }
@@ -327,19 +434,74 @@ int main(){
                             break;
                         }
                     }
-
-                    break;
                 }
+
+                break;
             }
                 case 4: {
+                    if (!archivoCargado) {
+                        cout << "Primero carga un archivo" << endl;
+                        break;
+                    }
+                    int opcionCalificaciones;
+                    bool menuCalificaciones = true;
+                    while(menuCalificaciones) {
+                        cout << "1. Calificar por titulo\n"
+                                "2. Regresar\n";
+
+                        cin >> opcionCalificaciones;
+
+                        switch(opcionCalificaciones) {
+                            case 1:{
+                                cout << "Insertar el titulo de la serie o pelicula: " << endl;
+                                string titulo;
+                                int errors = 0;
+                                cin.ignore();
+                                getline(std::cin, titulo);
+                                for (int i = 0; i < dataSize; i++) {
+                                    if (arrayVideos[i]->get_nombre() == titulo) {
+                                        cout << "Insertar la calificacion: " << endl;
+                                        float calificacion;
+                                        cin >> calificacion;
+                                        arrayGrades[i] = calificacion;
+                                        appendValueToLineInCSV(archivoCalif, i, to_string(calificacion));
+                                        if (!loadVideoGradesfromCSV(archivoCalif, arrayGrades, dataSize)) {
+                                            cerr << "Error al cargar el data set de " << archivoCalif << "\n";
+                                            delete[] arrayGrades;
+                                            return 0;
+                                        }
+                                    } else {
+                                        errors++;
+                                    }
+                                    if (errors == dataSize) {
+                                        cout << "No se encontro el titulo" << endl;
+                                    }
+                                }
+                                break;
+
+                            }
+                            case 2:{
+                                menuCalificaciones = false;
+                                break;
+                            }
+                        }
+                        }
+                    break;
+                }
+                case 5: {
                     menu = false;
                     break;
                 }
+                case 6:{
+                    for (int i = 0; i < dataSize; i++) {
+                        arrayVideos[i]->print();
+                        cout << "Calificacion: " << arrayGrades[i] << endl;
+                    }
+                    break;
+                }
             }
-
         }
-
-
     delete [] arrayVideos;
+    delete [] arrayGrades;
     return 0;
 }

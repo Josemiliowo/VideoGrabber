@@ -9,7 +9,8 @@ Pelicula::Pelicula() {
     nominaciones = 0;
 }
 
-Pelicula::Pelicula(int nominaciones) : Video(duracion, calificacion, genero, nombre){
+Pelicula::Pelicula(int nominaciones, float duracion, float calificacion, std::string genero, std::string nombre)
+        : Video(duracion, calificacion, genero, nombre), nominaciones(nominaciones) {
     this->nominaciones = nominaciones;
 }
 

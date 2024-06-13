@@ -10,7 +10,6 @@
 class Serie : public Video{
 public:
     Serie();
-    Serie(int temporadas, int capitulos);
     Serie(int temporadas, int capitulos, float duracion, float calificacion, std::string genero, std::string nombre);
     ~Serie() = default;
 

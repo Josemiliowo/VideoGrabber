@@ -59,5 +59,4 @@ void Video::print() {
     std::cout << "Nombre: " << nombre << std::endl;
     std::cout << "Genero: " << genero << std::endl;
     std::cout << "Duracion: " << duracion << std::endl;
-    std::cout << "Calificacion: " << calificacion << std::endl;
 }

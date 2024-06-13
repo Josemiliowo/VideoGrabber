@@ -1,3 +1,3 @@
-C:/Users/josem/CLionProjects/SPPOO2/cmake-build-debug/CMakeFiles/untitled.dir
-C:/Users/josem/CLionProjects/SPPOO2/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/josem/CLionProjects/SPPOO2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/coshe/OneDrive/Documents/GitHub/SPPOO2/cmake-build-debug/CMakeFiles/untitled.dir
+C:/Users/coshe/OneDrive/Documents/GitHub/SPPOO2/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/coshe/OneDrive/Documents/GitHub/SPPOO2/cmake-build-debug/CMakeFiles/rebuild_cache.dir

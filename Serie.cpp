@@ -9,8 +9,8 @@ Serie::Serie() {
     temporadas = 0;
     capitulos = 0;
 }
-Serie::Serie(int temporadas, int capitulos) : Video(duracion, calificacion, genero, nombre){
-
+Serie::Serie(int temporadas, int capitulos, float duracion, float calificacion, std::string genero, std::string nombre)
+        : Video(duracion, calificacion, genero, nombre), temporadas(temporadas), capitulos(capitulos) {
     this->temporadas = temporadas;
     this->capitulos = capitulos;
 }
